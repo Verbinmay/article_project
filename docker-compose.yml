@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: ${ARTICLE_DB_NAME}
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${ARTICLE_DB_NAME}
+      POSTGRES_USER: ${ARTICLE_DB_USER}
+      POSTGRES_PASSWORD: ${ARTICLE_DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - '${ARTICLE_DB_PORT}:5432'
+    networks:
+      - article_network
+    healthcheck:
+      test:
+        ['CMD-SHELL', 'pg_isready -U ${ARTICLE_DB_USER} -d ${ARTICLE_DB_NAME}']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7.0-alpine
+    container_name: ${ARTICLE_REDIS_NAME}
+    env_file:
+      - .env
+    environment:
+      - REDIS_USER=${ARTICLE_REDIS_USER}
+      - REDIS_PASSWORD=${ARTICLE_REDIS_PASSWORD}
+      - REDIS_USER_PASSWORD=${ARTICLE_REDIS_PASSWORD}
+    ports:
+      - '${ARTICLE_REDIS_PORT}:6379'
+    volumes:
+      - redis_data:/data
+    networks:
+      - article_network
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    command: >
+      redis-server
+      --requirepass ${ARTICLE_REDIS_PASSWORD}
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  article_network:
+    driver: bridge

@@ -1,0 +1,6 @@
+{
+  "jest.autoEnable": false,
+  "jest.autoRun": { "watch": false, "onSave": "none" },
+  "jest.runMode": "on-demand",
+  "jest.enableInlineErrorMessages": false
+}
